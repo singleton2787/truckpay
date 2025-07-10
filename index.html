@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flatbed Trucking Pay Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .results {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .load-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .load-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .load-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-item h5 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .summary-item p {
+            color: #3498db;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .pay-schedule {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pay-schedule table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pay-schedule th, .pay-schedule td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .pay-schedule th {
+            background: #3498db;
+            color: white;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+
+        .total-pay {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .goal-tracker {
+            background: #9b59b6;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            height: 20px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #2ecc71;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 Flatbed Trucking Pay Calculator</h1>
+            <p>Calculate your earnings with precision and plan your optimal routes</p>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>📋 Pay Schedule Reference</h2>
+                <div class="pay-schedule">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Miles</th>
+                                <th>0-6 Months</th>
+                                <th>6m-1 Year</th>
+                                <th>1+ Years</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>151-350</td>
+                                <td>$0.62</td>
+                                <td>$0.64</td>
+                                <td>$0.66</td>
+                            </tr>
+                            <tr>
+                                <td>351-550</td>
+                                <td>$0.57</td>
+                                <td>$0.59</td>
+                                <td>$0.61</td>
+                            </tr>
+                            <tr>
+                                <td>551-800</td>
+                                <td>$0.55</td>
+                                <td>$0.57</td>
+                                <td>$0.59</td>
+                            </tr>
+                            <tr>
+                                <td>801+</td>
+                                <td>$0.52</td>
+                                <td>$0.54</td>
+                                <td>$0.56</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 15px;"><strong>Minimum per load:</strong> $75.00 | <strong>Tarp pay:</strong> $25.00</p>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="section">
+                    <h2>🎯 Weekly Goal Tracker</h2>
+                    <div class="form-group">
+                        <label for="weeklyGoal">Weekly Goal ($):</label>
+                        <input type="number" id="weeklyGoal" value="1200" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalPay">Additional Pay ($):</label>
+                        <input type="number" id="additionalPay" value="0" min="0" placeholder="Bonuses, layover, etc.">
+                    </div>
+                    <div class="goal-tracker" id="goalTracker" style="display: none;">
+                        <h3>Goal Progress</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="goalText"></p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>👤 Driver Settings</h2>
+                    <div class="form-group">
+                        <label for="experience">Experience Level:</label>
+                        <select id="experience">
+                            <option value="0-6">0-6 Months</option>
+                            <option value="6-12">6 Months - 1 Year</option>
+                            <option value="1+">1+ Years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="flatRate">Use Flat Rate (optional):</label>
+                        <input type="number" id="flatRate" step="0.01" placeholder="e.g., 0.52">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>➕ Add Load</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="form-group">
+                            <label for="loadName">Load Name/Route:</label>
+                            <input type="text" id="loadName" placeholder="e.g., Dallas to Houston">
+                        </div>
+                        <div class="form-group">
+                            <label for="emptyMiles">Empty Miles:</label>
+                            <input type="number" id="emptyMiles" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="loadedMiles">Loaded Miles:</label>
+                            <input type="number" id="loadedMiles" min="0" required>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tarped">
+                                <label for="tarped">Tarped Load (+$25)</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="extraPay">Extra Pay ($):</label>
+                            <input type="number" id="extraPay" value="0" min="0" placeholder="Stops, layover, etc.">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addLoad()">Add Load</button>
+            </div>
+
+            <div class="section">
+                <h2>📊 Load Summary</h2>
+                <button class="btn btn-danger" onclick="clearAllLoads()">Clear All Loads</button>
+                <div id="loadsList"></div>
+                <div class="total-pay" id="totalPay">Total Pay: $0.00</div>
+            </div>
+
+            <div class="section">
+                <h2>🧮 Quick Calculators</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Distance Calculator</h3>
+                        <div class="form-group">
+                            <label for="fromCity">From:</label>
+                            <input type="text" id="fromCity" placeholder="e.g., Waco, TX">
+                        </div>
+                        <div class="form-group">
+                            <label for="toCity">To:</label>
+                            <input type="text" id="toCity" placeholder="e.g., Tucson, AZ">
+                        </div>
+                        <button class="btn" onclick="calculateDistance()">Calculate Distance</button>
+                        <div id="distanceResult"></div>
+                    </div>
+                    <div>
+                        <h3>Optimal Run Calculator</h3>
+                        <div class="form-group">
+                            <label for="targetEarnings">Target Earnings ($):</label>
+                            <input type="number" id="targetEarnings" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="daysAvailable">Days Available:</label>
+                            <input type="number" id="daysAvailable" value="5" min="1">
+                        </div>
+                        <button class="btn" onclick="calculateOptimalRuns()">Calculate Optimal Runs</button>
+                        <div id="optimalResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loads = [];
+        let totalPay = 0;
+
+        // Pay rates based on experience and mileage
+        const payRates = {
+            '0-6': { '151-350': 0.62, '351-550': 0.57, '551-800': 0.55, '801+': 0.52 },
+            '6-12': { '151-350': 0.64, '351-550': 0.59, '551-800': 0.57, '801+': 0.54 },
+            '1+': { '151-350': 0.66, '351-550': 0.61, '551-800': 0.59, '801+': 0.56 }
+        };
+
+        function getPayRate(experience, totalMiles) {
+            const flatRate = parseFloat(document.getElementById('flatRate').value);
+            if (flatRate && flatRate > 0) {
+                return flatRate;
+            }
+
+            if (totalMiles >= 151 && totalMiles <= 350) return payRates[experience]['151-350'];
+            if (totalMiles >= 351 && totalMiles <= 550) return payRates[experience]['351-550'];
+            if (totalMiles >= 551 && totalMiles <= 800) return payRates[experience]['551-800'];
+            if (totalMiles >= 801) return payRates[experience]['801+'];
+            return payRates[experience]['151-350']; // Default for under 151 miles
+        }
+
+        function addLoad() {
+            const loadName = document.getElementById('loadName').value || 'Unnamed Load';
+            const emptyMiles = parseInt(document.getElementById('emptyMiles').value) || 0;
+            const loadedMiles = parseInt(document.getElementById('loadedMiles').value) || 0;
+            const tarped = document.getElementById('tarped').checked;
+            const extraPay = parseFloat(document.getElementById('extraPay').value) || 0;
+            const experience = document.getElementById('experience').value;
+
+            if (loadedMiles <= 0) {
+                alert('Please enter loaded miles');
+                return;
+            }
+
+            const totalMiles = emptyMiles + loadedMiles;
+            const payRate = getPayRate(experience, totalMiles);
+            const milePay = totalMiles * payRate;
+            const tarpPay = tarped ? 25 : 0;
+            const minimumPay = 75;
+            const basePay = Math.max(milePay, minimumPay);
+            const totalLoadPay = basePay + tarpPay + extraPay;
+
+            const load = {
+                name: loadName,
+                emptyMiles,
+                loadedMiles,
+                totalMiles,
+                payRate,
+                milePay,
+                tarpPay,
+                extraPay,
+                totalPay: totalLoadPay,
+                tarped
+            };
+
+            loads.push(load);
+            updateDisplay();
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('loadName').value = '';
+            document.getElementById('emptyMiles').value = '0';
+            document.getElementById('loadedMiles').value = '';
+            document.getElementById('tarped').checked = false;
+            document.getElementById('extraPay').value = '0';
+        }
+
+        function updateDisplay() {
+            const loadsList = document.getElementById('loadsList');
+            const totalPayElement = document.getElementById('totalPay');
+            
+            loadsList.innerHTML = '';
+            totalPay = 0;
+
+            loads.forEach((load, index) => {
+                totalPay += load.totalPay;
+                
+                const loadDiv = document.createElement('div');
+                loadDiv.className = 'load-item';
+                loadDiv.innerHTML = `
+                    <h4>${load.name}</h4>
+                    <div class="load-summary">
+                        <div class="summary-item">
+                            <h5>Empty Miles</h5>
+                            <p>${load.emptyMiles}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Loaded Miles</h5>
+                            <p>${load.loadedMiles}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Total Miles</h5>
+                            <p>${load.totalMiles}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Pay Rate</h5>
+                            <p>$${load.payRate.toFixed(2)}/mi</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Mile Pay</h5>
+                            <p>$${load.milePay.toFixed(2)}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Tarp Pay</h5>
+                            <p>$${load.tarpPay.toFixed(2)}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Extra Pay</h5>
+                            <p>$${load.extraPay.toFixed(2)}</p>
+                        </div>
+                        <div class="summary-item">
+                            <h5>Total Pay</h5>
+                            <p>$${load.totalPay.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="removeLoad(${index})">Remove Load</button>
+                `;
+                loadsList.appendChild(loadDiv);
+            });
+
+            const additionalPay = parseFloat(document.getElementById('additionalPay').value) || 0;
+            const grandTotal = totalPay + additionalPay;
+            totalPayElement.textContent = `Total Pay: $${grandTotal.toFixed(2)}`;
+            
+            updateGoalTracker(grandTotal);
+        }
+
+        function updateGoalTracker(currentPay) {
+            const goal = parseFloat(document.getElementById('weeklyGoal').value) || 0;
+            const goalTracker = document.getElementById('goalTracker');
+            const progressFill = document.getElementById('progressFill');
+            const goalText = document.getElementById('goalText');
+
+            if (goal > 0) {
+                goalTracker.style.display = 'block';
+                const percentage = Math.min((currentPay / goal) * 100, 100);
+                progressFill.style.width = percentage + '%';
+                
+                const remaining = Math.max(goal - currentPay, 0);
+                goalText.textContent = `$${currentPay.toFixed(2)} of $${goal.toFixed(2)} (${percentage.toFixed(1)}%) | $${remaining.toFixed(2)} remaining`;
+            } else {
+                goalTracker.style.display = 'none';
+            }
+        }
+
+        function removeLoad(index) {
+            loads.splice(index, 1);
+            updateDisplay();
+        }
+
+        function clearAllLoads() {
+            if (confirm('Are you sure you want to clear all loads?')) {
+                loads = [];
+                updateDisplay();
+            }
+        }
+
+        function calculateDistance() {
+            const fromCity = document.getElementById('fromCity').value;
+            const toCity = document.getElementById('toCity').value;
+            const resultDiv = document.getElementById('distanceResult');
+            
+            if (!fromCity || !toCity) {
+                resultDiv.innerHTML = '<p style="color: red;">Please enter both cities</p>';
+                return;
+            }
+            
+            // This is a simplified distance calculator - in a real app you'd use a mapping API
+            resultDiv.innerHTML = `
+                <div style="margin-top: 15px; padding: 15px; background: #3498db; color: white; border-radius: 10px;">
+                    <p><strong>Route:</strong> ${fromCity} → ${toCity}</p>
+                    <p><em>Note: Use a mapping service for exact distances</em></p>
+                </div>
+            `;
+        }
+
+        function calculateOptimalRuns() {
+            const target = parseFloat(document.getElementById('targetEarnings').value) || 1000;
+            const days = parseInt(document.getElementById('daysAvailable').value) || 5;
+            const experience = document.getElementById('experience').value;
+            const resultDiv = document.getElementById('optimalResult');
+            
+            // Calculate optimal strategy
+            const optimalRate = payRates[experience]['151-350']; // Best rate
+            const milesNeeded = target / (optimalRate + 0.08); // Including average tarp pay
+            const milesPerDay = milesNeeded / days;
+            const loadsNeeded = Math.ceil(milesNeeded / 300); // Assuming 300-mile average loads
+            
+            resultDiv.innerHTML = `
+                <div style="margin-top: 15px; padding: 15px; background: #27ae60; color: white; border-radius: 10px;">
+                    <h4>Optimal Strategy</h4>
+                    <p><strong>Total miles needed:</strong> ${Math.ceil(milesNeeded)} miles</p>
+                    <p><strong>Miles per day:</strong> ${Math.ceil(milesPerDay)} miles</p>
+                    <p><strong>Recommended loads:</strong> ${loadsNeeded} loads (300 miles avg)</p>
+                    <p><strong>Best rate:</strong> $${optimalRate}/mile (151-350 mile range)</p>
+                    <p><strong>Tip:</strong> Focus on tarped loads in the 280-320 mile range!</p>
+                </div>
+            `;
+        }
+
+        // Event listeners for real-time updates
+        document.getElementById('weeklyGoal').addEventListener('input', () => {
+            const additionalPay = parseFloat(document.getElementById('additionalPay').value) || 0;
+            updateGoalTracker(totalPay + additionalPay);
+        });
+
+        document.getElementById('additionalPay').addEventListener('input', updateDisplay);
+        document.getElementById('experience').addEventListener('change', updateDisplay);
+        document.getElementById('flatRate').addEventListener('input', updateDisplay);
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
