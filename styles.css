@@ -1,0 +1,388 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 10px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    opacity: 0.9;
+}
+
+.pay-period-display {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.pay-period-display h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.main-content {
+    padding: 15px;
+}
+
+.section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    border-left: 5px solid #3498db;
+}
+
+.section h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.2);
+}
+
+.btn {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+}
+
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.load-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border-left: 5px solid #3498db;
+    position: relative;
+}
+
+.load-item h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.load-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.summary-item {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.summary-item h5 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+}
+
+.summary-item p {
+    color: #3498db;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pay-schedule {
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow-x: auto;
+}
+
+.pay-schedule table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 300px;
+}
+
+.pay-schedule th, .pay-schedule td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #bdc3c7;
+    font-size: 0.9rem;
+}
+
+.pay-schedule th {
+    background: #3498db;
+    color: white;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.total-pay {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.goal-tracker {
+    background: #9b59b6;
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.progress-bar {
+    background: rgba(255,255,255,0.3);
+    border-radius: 10px;
+    height: 20px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: #2ecc71;
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.collapsible-section {
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapsible-section:hover {
+    background: #e8f4f8;
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.collapsible-content.active {
+    max-height: 1000px;
+}
+
+.week-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.week-btn {
+    padding: 8px 16px;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.week-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.saved-trips {
+    background: #e8f5e8;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.trip-history-item {
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #27ae60;
+}
+
+.quick-add-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.quick-add-btn {
+    padding: 8px 16px;
+    background: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.quick-add-btn:hover {
+    background: #3498db;
+    color: white;
+}
+
+.remove-load-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: background 0.2s ease;
+}
+
+.remove-load-btn:hover {
+    background: #c0392b;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .two-column {
+        grid-template-columns: 1fr;
+    }
+
+    .btn {
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+
+    .load-summary {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .pay-schedule {
+        font-size: 0.8rem;
+    }
+
+    .pay-schedule th, .pay-schedule td {
+        padding: 6px;
+    }
+}
+
+@media (min-width: 769px) {
+    .two-column {
+        grid-template-columns: 1fr 1fr;
+    }
+}
