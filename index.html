@@ -4,752 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flatbed Trucking Pay Calculator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        .pay-period-display {
-            background: #3498db;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
-        }
-
-        .collapsible-section {
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.3s;
-        }
-
-        .collapsible-section:hover {
-            color: #3498db;
-        }
-
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .collapsible-content.active {
-            max-height: 1000px;
-        }
-
-        .pay-schedule table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .pay-schedule th,
-        .pay-schedule td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .pay-schedule th {
-            background: #3498db;
-            color: white;
-        }
-
-        .pay-schedule tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .week-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .week-btn {
-            padding: 8px 12px;
-            background: #ecf0f1;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.85em;
-        }
-
-        .week-btn:hover {
-            background: #d5dbdb;
-        }
-
-        .week-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .btn:hover {
-            background: #2980b9;
-        }
-
-        .btn-success {
-            background: #27ae60;
-        }
-
-        .btn-success:hover {
-            background: #219a52;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-warning {
-            background: #f39c12;
-        }
-
-        .btn-warning:hover {
-            background: #e67e22;
-        }
-
-        .total-pay {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-
-        .goal-tracker {
-            background: #ecf0f1;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .progress-bar {
-            background: #bdc3c7;
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-
-        .load-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .remove-load-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .load-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .summary-item h5 {
-            color: #7f8c8d;
-            font-size: 0.8em;
-            margin-bottom: 3px;
-        }
-
-        .summary-item p {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .trip-history-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .quick-fill-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tools-section {
-            grid-column: 1 / -1;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .week-selector {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header class="header">
             <h1>🚛 Flatbed Trucking Pay Calculator</h1>
-            <p>Calculate your earnings with precision and plan your optimal routes</p>
-            <div class="pay-period-display">
-                <h3>Current Pay Period</h3>
-                <p id="currentPayPeriod">Loading...</p>
-            </div>
+            <p>Calculate your earnings with precision</p>
+        </header>
+        
+        <div class="current-pay-period">
+            Current Pay Period: <span id="currentPayPeriod">Loading...</span>
         </div>
-
+        
+        <div class="week-selector" id="weekSelector">
+            <!-- Week buttons will be generated by JavaScript -->
+        </div>
+        
         <div class="main-content">
-            <!-- Pay Schedule Reference -->
+            <!-- Settings Section -->
             <div class="section">
-                <h2 class="collapsible-section" onclick="toggleSection('paySchedule')">📋 Pay Schedule Reference ▼</h2>
-                <div id="paySchedule" class="collapsible-content">
-                    <div class="pay-schedule">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Miles</th>
-                                    <th>0-6 Months</th>
-                                    <th>6m-1 Year</th>
-                                    <th>1+ Years</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>151-350</td>
-                                    <td>$0.62</td>
-                                    <td>$0.64</td>
-                                    <td>$0.66</td>
-                                </tr>
-                                <tr>
-                                    <td>351-550</td>
-                                    <td>$0.57</td>
-                                    <td>$0.59</td>
-                                    <td>$0.61</td>
-                                </tr>
-                                <tr>
-                                    <td>551-800</td>
-                                    <td>$0.55</td>
-                                    <td>$0.57</td>
-                                    <td>$0.59</td>
-                                </tr>
-                                <tr>
-                                    <td>801+</td>
-                                    <td>$0.52</td>
-                                    <td>$0.54</td>
-                                    <td>$0.56</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p style="margin-top: 15px;"><strong>Minimum per load:</strong> $75.00</p>
-                        <p><strong>Accessorial Pay:</strong> Tarp: $25 | Tarp Stop: $25 | Stop: $25 | Border Crossing: $100 | Layover: $114</p>
-                        <p><strong>Pay Split:</strong> 63% Taxable | 37% Non-Taxable (Per Diem)</p>
+                <div class="section-header" onclick="toggleSection('settingsContent')">
+                    ⚙️ Settings & Configuration
+                </div>
+                <div class="section-content active" id="settingsContent">
+                    <div class="form-group">
+                        <label for="experience">Experience Level:</label>
+                        <select id="experience">
+                            <option value="0-6">0-6 months</option>
+                            <option value="6-12">6-12 months</option>
+                            <option value="1+">1+ years</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="flatRate">Flat Rate (optional, per mile):</label>
+                        <input type="number" id="flatRate" step="0.001" placeholder="e.g., 0.65">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weeklyGoal">Weekly Goal ($):</label>
+                        <input type="number" id="weeklyGoal" value="1200">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additionalPay">Additional Pay ($):</label>
+                        <input type="number" id="additionalPay" value="0" step="0.01">
                     </div>
                 </div>
             </div>
-
-            <!-- Week Selection -->
+            
+            <!-- Add Load Section -->
             <div class="section">
-                <h2>📅 Select Pay Week</h2>
-                <div class="week-selector" id="weekSelector"></div>
-                <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                    Select different weeks to track multiple pay periods
-                </p>
-            </div>
-
-            <!-- Settings -->
-            <div class="section">
-                <h2>⚙️ Settings</h2>
-                <div class="form-group">
-                    <label for="experience">Experience Level:</label>
-                    <select id="experience">
-                        <option value="0-6">0-6 Months</option>
-                        <option value="6-12">6 Months - 1 Year</option>
-                        <option value="1+">1+ Years</option>
-                    </select>
+                <div class="section-header" onclick="toggleSection('addLoadContent')">
+                    ➕ Add New Load
                 </div>
-                <div class="form-group">
-                    <label for="flatRate">Flat Rate Override ($/mile):</label>
-                    <input type="number" id="flatRate" step="0.001" placeholder="Leave empty to use standard rates">
-                </div>
-                <div class="form-group">
-                    <label for="weeklyGoal">Weekly Goal ($):</label>
-                    <input type="number" id="weeklyGoal" value="1200">
-                </div>
-                <div class="form-group">
-                    <label for="additionalPay">Additional Pay ($):</label>
-                    <input type="number" id="additionalPay" value="0" step="0.01">
-                </div>
-            </div>
-
-            <!-- Load Entry -->
-            <div class="section">
-                <h2>📦 Add Load</h2>
-                <div class="quick-fill-buttons">
-                    <button class="btn btn-warning" onclick="quickFillLoad('Short Haul', 50, 250, false)">Short Haul</button>
-                    <button class="btn btn-warning" onclick="quickFillLoad('Medium Haul', 75, 400, true)">Medium Haul</button>
-                    <button class="btn btn-warning" onclick="quickFillLoad('Long Haul', 100, 600, true)">Long Haul</button>
-                </div>
-                
-                <div class="form-group">
-                    <label for="loadName">Load Name:</label>
-                    <input type="text" id="loadName" placeholder="e.g., Steel to Atlanta">
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label for="emptyMiles">Empty Miles:</label>
-                        <input type="number" id="emptyMiles" value="0">
+                <div class="section-content active" id="addLoadContent">
+                    <div class="quick-fill-buttons">
+                        <button class="quick-fill-btn" onclick="quickFillLoad('Short Haul', 50, 250, false)">Short Haul</button>
+                        <button class="quick-fill-btn" onclick="quickFillLoad('Medium Haul', 30, 450, true)">Medium Haul</button>
+                        <button class="quick-fill-btn" onclick="quickFillLoad('Long Haul', 20, 650, true)">Long Haul</button>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="loadedMiles">Loaded Miles:</label>
-                        <input type="number" id="loadedMiles" placeholder="Required">
+                        <label for="loadName">Load Name:</label>
+                        <input type="text" id="loadName" placeholder="e.g., Load 1">
                     </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tarped">
-                            <label for="tarped">Tarped Load (+$25)</label>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emptyMiles">Empty Miles:</label>
+                            <input type="number" id="emptyMiles" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="loadedMiles">Loaded Miles:</label>
+                            <input type="number" id="loadedMiles" required>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="tarpStops">Tarp Stops:</label>
-                        <input type="number" id="tarpStops" value="0" min="0">
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="tarped">
+                        <label for="tarped">Tarped Load (+$25)</label>
                     </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label for="stops">Additional Stops:</label>
-                        <input type="number" id="stops" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="borderCrossing">
-                            <label for="borderCrossing">Border Crossing (+$100)</label>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tarpStops">Tarp Stops:</label>
+                            <input type="number" id="tarpStops" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="stops">Additional Stops:</label>
+                            <input type="number" id="stops" value="0" min="0">
                         </div>
                     </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="layover">
-                            <label for="layover">Layover (+$114)</label>
-                        </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="borderCrossing">
+                        <label for="borderCrossing">Border Crossing (+$100)</label>
                     </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="layover">
+                        <label for="layover">Layover (+$114)</label>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="extraPay">Extra Pay ($):</label>
                         <input type="number" id="extraPay" value="0" step="0.01">
                     </div>
+                    
+                    <button class="btn" onclick="addLoad()">Add Load</button>
                 </div>
-
-                <button class="btn btn-success" onclick="addLoad()" style="width: 100%; margin-top: 15px;">Add Load</button>
             </div>
-
-            <!-- Current Week Summary -->
-            <div class="section">
-                <h2>💰 Current Week Summary</h2>
-                <div id="totalPay" class="total-pay">
-                    Total Pay: $0.00
+            
+            <!-- Summary Section -->
+            <div class="section full-width">
+                <div class="section-header" onclick="toggleSection('summaryContent')">
+                    📊 Pay Summary
                 </div>
-                
-                <div id="goalTracker" class="goal-tracker" style="display: none;">
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
+                <div class="section-content active" id="summaryContent">
+                    <div class="total-pay" id="totalPay">
+                        Total Pay: $0.00
                     </div>
-                    <div id="goalText" style="text-align: center; font-weight: bold;"></div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <button class="btn" onclick="saveTrips()">Save Week</button>
-                    <button class="btn" onclick="loadTrips()">Load Week</button>
-                    <button class="btn btn-danger" onclick="clearAllLoads()">Clear All</button>
-                </div>
-            </div>
-
-            <!-- Current Loads -->
-            <div class="section" style="grid-column: 1 / -1;">
-                <h2>📋 Current Loads</h2>
-                <div id="loadsList">
-                    <p style="text-align: center; color: #666; padding: 20px;">No loads added yet. Add your first load above!</p>
+                    
+                    <div class="goal-tracker" id="goalTracker" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                        </div>
+                        <div id="goalText">$0.00 remaining to reach your goal</div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-secondary" onclick="saveTrips()">Save Week</button>
+                        <button class="btn btn-danger" onclick="clearAllLoads()">Clear All</button>
+                    </div>
                 </div>
             </div>
-
-            <!-- Trip History -->
-            <div class="section tools-section">
-                <h2 class="collapsible-section" onclick="toggleSection('tripHistory')">📊 Trip History ▼</h2>
-                <div id="tripHistory" class="collapsible-content">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                        <button class="btn" onclick="exportTripHistory()">Export CSV</button>
+            
+            <!-- Current Loads Section -->
+            <div class="section full-width">
+                <div class="section-header" onclick="toggleSection('loadsContent')">
+                    🚚 Current Loads
+                </div>
+                <div class="section-content active" id="loadsContent">
+                    <div id="loadsList">
+                        <p style="text-align: center; color: #666; padding: 20px;">No loads added yet. Add your first load above!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trip History Section -->
+            <div class="section full-width">
+                <div class="section-header" onclick="toggleSection('historyContent')">
+                    📈 Trip History
+                </div>
+                <div class="section-content" id="historyContent">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                         <button class="btn btn-danger" onclick="clearTripHistory()">Clear History</button>
                     </div>
-                    <div id="tripHistoryList"></div>
+                    <div id="tripHistoryList">
+                        <p style="text-align: center; color: #666; padding: 20px;">No trip history yet. Complete some weeks and save them!</p>
+                    </div>
                 </div>
             </div>
-
-            <!-- Tools -->
-            <div class="section tools-section">
-                <h2 class="collapsible-section" onclick="toggleSection('tools')">🔧 Planning Tools ▼</h2>
-                <div id="tools" class="collapsible-content">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                        <div>
-                            <h3>Distance Calculator</h3>
-                            <div class="form-group">
-                                <label for="fromCity">From City:</label>
-                                <input type="text" id="fromCity" placeholder="e.g., Dallas, TX">
-                            </div>
-                            <div class="form-group">
-                                <label for="toCity">To City:</label>
-                                <input type="text" id="toCity" placeholder="e.g., Atlanta, GA">
-                            </div>
-                            <button class="btn" onclick="calculateDistance()">Calculate Distance</button>
-                            <div id="distanceResult" style="margin-top: 10px;"></div>
+            
+            <!-- Planning Tools Section -->
+            <div class="section full-width">
+                <div class="section-header" onclick="toggleSection('toolsContent')">
+                    🛠️ Planning Tools
+                </div>
+                <div class="section-content" id="toolsContent">
+                    <div>
+                        <h4>Optimal Run Calculator</h4>
+                        <div class="form-group">
+                            <label for="targetEarnings">Target Earnings ($):</label>
+                            <input type="number" id="targetEarnings" placeholder="e.g., 1200">
                         </div>
-                        
-                        <div>
-                            <h3>Optimal Run Calculator</h3>
-                            <div class="form-group">
-                                <label for="targetEarnings">Target Weekly Earnings ($):</label>
-                                <input type="number" id="targetEarnings" placeholder="e.g., 1500">
-                            </div>
-                            <div class="form-group">
-                                <label for="daysAvailable">Days Available:</label>
-                                <input type="number" id="daysAvailable" value="5" min="1" max="7">
-                            </div>
-                            <button class="btn" onclick="calculateOptimalRuns()">Calculate Optimal Runs</button>
-                            <div id="optimalResult" style="margin-top: 10px;"></div>
+                        <div class="form-group">
+                            <label for="daysAvailable">Days Available:</label>
+                            <input type="number" id="daysAvailable" value="5" min="1" max="7">
                         </div>
+                        <button class="btn" onclick="calculateOptimalRuns()">Calculate</button>
+                        <div id="optimalResult" style="margin-top: 15px;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let loads = [];
-        let totalPay = 0;
-        let currentWeek = getCurrentSundayWeek();
-        let tripHistory = JSON.parse(localStorage.getItem('truckingTripHistory') || '{}');
-
-        // Updated pay rates structure with taxable and non-taxable components
-        const payRates = {
-            '0-6': {
-                '151-350': { total: 0.62, taxable: 0.3906, nonTaxable: 0.2294 },
-                '351-550': { total: 0.57, taxable: 0.3591, nonTaxable: 0.2109 },
-                '551-800': { total: 0.55, taxable: 0.3465, nonTaxable: 0.2035 },
-                '801+': { total: 0.52, taxable: 0.3276, nonTaxable: 0.1924 }
-            },
-            '6-12': {
-                '151-350': { total: 0.64, taxable: 0.4032, nonTaxable: 0.2368 },
-                '351-550': { total: 0.59, taxable: 0.3717, nonTaxable: 0.2183 },
-                '551-800': { total: 0.57, taxable: 0.3591, nonTaxable: 0.2109 },
-                '801+': { total: 0.54, taxable: 0.3402, nonTaxable: 0.1998 }
-            },
-            '1+': {
-                '151-350': { total: 0.66, taxable: 0.4158, nonTaxable: 0.2442 },
-                '351-550': { total: 0.61, taxable: 0.3843, nonTaxable: 0.2257 },
-                '551-800': { total: 0.59, taxable: 0.3717, nonTaxable: 0.2183 },
-                '801+': { total: 0.56, taxable: 0.3528, nonTaxable: 0.2072 }
-            }
-        };
-
-        const MIN_PAY_PER_LOAD = 75;
-        const TARP_PAY = 25;
-        const TARP_STOP_PAY = 25;
-        const STOP_PAY = 25;
-        const BORDER_CROSSING_PAY = 100;
-        const LAYOVER_PAY = 114;
-        const ACCESSORIAL_TAXABLE_RATIO = 1.0;
-
-        function getCurrentSundayWeek() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const daysToSubtract = dayOfWeek;
-            const thisWeeksSunday = new Date(today);
-            thisWeeksSunday.setDate(today.getDate() - daysToSubtract);
-            thisWeeksSunday.setHours(0, 0, 0, 0);
-            return thisWeeksSunday.toISOString().split('T')[0];
-        }
-
-        function updatePayPeriodDisplay() {
-            const sunday = new Date(currentWeek + 'T00:00:00');
-            const saturday = new Date(sunday);
-            saturday.setDate(sunday.getDate() + 6);
-            
-            const payPeriodElement = document.getElementById('currentPayPeriod');
-            if (payPeriodElement) {
-                payPeriodElement.textContent = 
-                    `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-            }
-        }
-
-        function generateWeekOptions() {
-            const weekSelector = document.getElementById('weekSelector');
-            if (!weekSelector) return;
-            
-            weekSelector.innerHTML = '';
-            const today = new Date();
-            
-            for (let i = -4; i <= 3; i++) {
-                const sunday = new Date();
-                const dayOfWeek = today.getDay();
-                const daysToSubtract = dayOfWeek;
-                
-                sunday.setDate(today.getDate() - daysToSubtract + (i * 7));
-                sunday.setHours(0, 0, 0, 0);
-
-                const weekId = sunday.toISOString().split('T')[0];
-                const isCurrentWeek = weekId === currentWeek;
-                
-                const saturday = new Date(sunday);
-                saturday.setDate(sunday.getDate() + 6);
-
-                const weekBtn = document.createElement('div');
-                weekBtn.className = `week-btn ${isCurrentWeek ? 'active' : ''}`;
-                weekBtn.textContent = `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-                weekBtn.onclick = () => selectWeek(weekId, weekBtn);
-                
-                weekSelector.appendChild(weekBtn);
-            }
-        }
-
-        function selectWeek(weekId, buttonElement) {
-            saveWeekData();
-            
-            document.querySelectorAll('.week-btn').forEach(btn => btn.classList.remove('active'));
-            buttonElement.classList.add('active');
-            
-            currentWeek = weekId;
-            loadWeekData();
-            updatePayPeriodDisplay();
-            updateTripHistoryDisplay();
-        }
-
-        function saveWeekData() {
-            const weekData = {
-                loads: loads,
-                settings: {
-                    experience: document.getElementById('experience').value,
-                    flatRate: document.getElementById('flatRate').value,
-                    weeklyGoal: document.getElementById('weeklyGoal').value,
-                    additionalPay: document.getElementById('additionalPay').value
-                }
-            };
-            
-            localStorage.setItem(`truckingWeek_${currentWeek}`, JSON.stringify(weekData));
-        }
-
-        function loadWeekData() {
-            const weekData = JSON.parse(localStorage.getItem(`truckingWeek_${currentWeek}`) || '{}');
-            
-            loads = weekData.loads || [];
-            
-            if (weekData.settings) {
-                document.getElementById('experience').value = weekData.settings.experience || '0-6';
-                document.getElementById('flatRate').value = weekData.settings.flatRate || '';
-                document.getElementById('weeklyGoal').value = weekData.settings.weeklyGoal || '1200';
-                document.getElementById('additionalPay').value = weekData.settings.additionalPay || '0';
-            } else {
-                document.getElementById('experience').value = '0-6';
-                document.getElementById('flatRate').value = '';
-                document.getElementById('weeklyGoal').value = '1200';
-                document.getElementById('additionalPay').value = '0';
-            }
-            
-            updateDisplay();
-        }
-
-        function saveTripHistory() {
-            localStorage.setItem('truckingTripHistory', JSON.stringify(tripHistory));
-        }
-
-        function getPayRate(experience, totalMiles) {
-            const flatRateInput = document.getElementById('flatRate').value;
-            if (flatRateInput && !isNaN(parseFloat(flatRateInput)) && parseFloat(flatRateInput) > 0) {
-                const flatRate = parseFloat(flatRateInput);
-                return {
-                    total: flatRate,
-                    taxable: flatRate * 0.63,
-                    nonTaxable: flatRate * 0.37
-                };
-            }
-
-            if (totalMiles >= 151 && totalMiles <= 350) return payRates[experience]['151-350'];
-            if (totalMiles >= 351 && totalMiles <= 550) return payRates[experience]['351-550'];
-            if (totalMiles >= 551 && totalMiles <= 800) return payRates[experience]['551-800'];
-            if (totalMiles >= 801) return payRates[experience]['801+'];
-            
-            return payRates[experience]['151-350'];
-        }
-
-        function addLoad() {
-            const loadName = document.getElementById('loadName').value.trim() || `Load ${loads.length + 1}`;
-            const emptyMiles = parseInt(document.getElementById('emptyMiles').value) || 0;
-            const loadedMiles = parseInt(document.getElementById('loadedMiles').value) || 0;
-            const tarped = document.getElementById('tarped').checked;
-            const tarpStops = parseInt(document.getElementById('tarpStops').value) || 0;
-            const stops = parseInt(document.getElementById('stops').value) || 0;
-            const borderCrossing = document.getElementById('borderCrossing').checked;
-            const layover = document.getElementById('layover').checked;
-            const extraPay = parseFloat(document.getElementById('extraPay').value) || 0;
-            const experience = document.getElementById('experience').value;
-
-            if (loadedMiles <= 0) {
-                alert('Please enter loaded miles');
-                return;
-            }
-
-            const totalMiles = emptyMiles + loadedMiles;
-            const payRate = getPayRate(experience, totalMiles);
-            
-            let basePay = loadedMiles * payRate.total;
-            let basePayTaxable = loadedMiles * payRate.taxable;
-            let basePayNonTaxable = loadedMiles * payRate.nonTaxable;
-            
-            if (basePay < MIN_PAY_PER_LOAD) {
-                const ratio = MIN_PAY_PER_LOAD / basePay;
-                basePay = MIN_PAY_PER_LOAD;
-                basePayTaxable = basePayTaxable * ratio;
-                basePayNonTaxable = basePayNonTaxable * ratio;
-            }
-            
-            const tarpPay = tarped ? TARP_PAY : 0;
-            const tarpStopsPay = tarpStops * TARP_STOP_PAY;
-            const stopsPay = stops * STOP_PAY;
-            const borderPay = borderCrossing ? BORDER_CROSSING_PAY : 0;
-            const layoverPay = layover ? LAYOVER_PAY : 0;
-            
-            const totalAccessorialPay = tarpPay + tarpStopsPay + stopsPay + borderPay + layoverPay + extraPay;
-            
-            const totalLoadPay = basePay + totalAccessorialPay;
-            const totalT
+    <script src="script.js"></script>
+</body>
+</html>
