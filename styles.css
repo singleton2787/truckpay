@@ -5,384 +5,338 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
     min-height: 100vh;
-    padding: 10px;
+    padding: 20px;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     overflow: hidden;
 }
 
 .header {
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    background: #2c3e50;
     color: white;
     padding: 20px;
     text-align: center;
 }
 
 .header h1 {
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    margin-bottom: 10px;
-}
-
-.header p {
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
-    opacity: 0.9;
-}
-
-.pay-period-display {
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-    text-align: center;
-}
-
-.pay-period-display h3 {
-    font-size: 1.1rem;
+    font-size: 2em;
     margin-bottom: 5px;
 }
 
-.main-content {
+.current-pay-period {
+    background: #e67e22;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.week-selector {
+    display: flex;
+    gap: 10px;
     padding: 15px;
+    background: #f8f9fa;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.week-btn {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.week-btn:hover {
+    border-color: #007bff;
+}
+
+.week-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
 }
 
 .section {
-    margin-bottom: 20px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 15px;
-    border-left: 5px solid #3498db;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.section h2 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
+.section-header {
+    background: #f8f9fa;
+    padding: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.section-content {
+    padding: 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.section-content.active {
+    max-height: 2000px;
 }
 
 .form-group {
     margin-bottom: 15px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.95rem;
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
-input, select {
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+input, select, button {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
 }
 
 input:focus, select:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: #007bff;
+}
+
+.btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.load-item {
+    background: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    position: relative;
+    border: 1px solid #e9ecef;
+}
+
+.remove-load-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.load-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item h5 {
+    color: #666;
+    font-size: 0.8em;
+    margin-bottom: 5px;
+}
+
+.summary-item p {
+    font-size: 1em;
+    font-weight: 600;
+    color: #333;
+}
+
+.total-pay {
+    background: #28a745;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.goal-tracker {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    background: #dee2e6;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    background: #28a745;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.quick-fill-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.quick-fill-btn {
+    padding: 8px;
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.quick-fill-btn:hover {
+    background: #138496;
 }
 
 .checkbox-group {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-input[type="checkbox"] {
-    width: auto;
-    transform: scale(1.2);
-}
-
-.btn {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-    max-width: 300px;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.btn-secondary {
-    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-}
-
-.btn-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.load-item {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
     margin-bottom: 15px;
-    border-left: 5px solid #3498db;
-    position: relative;
 }
 
-.load-item h4 {
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+}
+
+.history-item {
+    background: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.history-item h4 {
     color: #2c3e50;
     margin-bottom: 10px;
-    font-size: 1.1rem;
 }
 
-.load-summary {
+.history-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px;
-    margin-bottom: 15px;
 }
 
-.summary-item {
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
+.history-stat {
     text-align: center;
 }
 
-.summary-item h5 {
-    color: #2c3e50;
+.history-stat h5 {
+    color: #666;
+    font-size: 0.8em;
     margin-bottom: 5px;
-    font-size: 0.8rem;
 }
 
-.summary-item p {
-    color: #3498db;
-    font-size: 1rem;
+.history-stat p {
     font-weight: 600;
+    color: #333;
 }
 
-.pay-schedule {
-    background: #ecf0f1;
+.optimal-result {
+    background: #e7f3ff;
     padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    overflow-x: auto;
-}
-
-.pay-schedule table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 300px;
-}
-
-.pay-schedule th, .pay-schedule td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #bdc3c7;
-    font-size: 0.9rem;
-}
-
-.pay-schedule th {
-    background: #3498db;
-    color: white;
-}
-
-.two-column {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
-}
-
-.total-pay {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
-    font-weight: 600;
-    margin-top: 20px;
-}
-
-.goal-tracker {
-    background: #9b59b6;
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    margin-top: 20px;
-}
-
-.progress-bar {
-    background: rgba(255,255,255,0.3);
-    border-radius: 10px;
-    height: 20px;
-    margin-top: 10px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    background: #2ecc71;
-    height: 100%;
-    transition: width 0.5s ease;
-}
-
-.collapsible-section {
-    cursor: pointer;
-    user-select: none;
-}
-
-.collapsible-section:hover {
-    background: #e8f4f8;
-}
-
-.collapsible-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-.collapsible-content.active {
-    max-height: 1000px;
-}
-
-.week-selector {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.week-btn {
-    padding: 8px 16px;
-    border: 2px solid #3498db;
-    background: white;
-    color: #3498db;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.week-btn.active {
-    background: #3498db;
-    color: white;
-}
-
-.saved-trips {
-    background: #e8f5e8;
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.trip-history-item {
-    background: white;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border-left: 3px solid #27ae60;
-}
-
-.quick-add-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 20px;
-}
-
-.quick-add-btn {
-    padding: 8px 16px;
-    background: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.quick-add-btn:hover {
-    background: #3498db;
-    color: white;
-}
-
-.remove-load-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
     border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    transition: background 0.2s ease;
+    border: 1px solid #b3d9ff;
 }
 
-.remove-load-btn:hover {
-    background: #c0392b;
-}
-
-/* Mobile optimizations */
 @media (max-width: 768px) {
     .main-content {
-        padding: 10px;
-    }
-
-    .section {
+        grid-template-columns: 1fr;
+        gap: 15px;
         padding: 15px;
     }
-
-    .two-column {
+    
+    .form-row {
         grid-template-columns: 1fr;
     }
-
-    .btn {
-        padding: 15px 20px;
-        font-size: 16px;
+    
+    .week-selector {
+        flex-direction: column;
     }
-
+    
     .load-summary {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    }
-
-    .pay-schedule {
-        font-size: 0.8rem;
-    }
-
-    .pay-schedule th, .pay-schedule td {
-        padding: 6px;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (min-width: 769px) {
-    .two-column {
-        grid-template-columns: 1fr 1fr;
-    }
+.full-width {
+    grid-column: 1 / -1;
 }
