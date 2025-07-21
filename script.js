@@ -3,13 +3,37 @@ let totalPay = 0;
 let currentWeek = getCurrentTuesdayWeek();
 let tripHistory = JSON.parse(localStorage.getItem('truckingTripHistory') || '{}');
 
+// Updated pay rates structure with taxable and non-taxable components
 const payRates = {
-    '0-6': { '151-350': 0.62, '351-550': 0.57, '551-800': 0.55, '801+': 0.52 },
-    '6-12': { '151-350': 0.64, '351-550': 0.59, '551-800': 0.57, '801+': 0.54 },
-    '1+': { '151-350': 0.66, '351-550': 0.61, '551-800': 0.59, '801+': 0.56 }
+    '0-6': {
+        '151-350': { total: 0.62, taxable: 0.3906, nonTaxable: 0.2294 },
+        '351-550': { total: 0.57, taxable: 0.3591, nonTaxable: 0.2109 },
+        '551-800': { total: 0.55, taxable: 0.3465, nonTaxable: 0.2035 },
+        '801+': { total: 0.52, taxable: 0.3276, nonTaxable: 0.1924 }
+    },
+    '6-12': {
+        '151-350': { total: 0.64, taxable: 0.4032, nonTaxable: 0.2368 },
+        '351-550': { total: 0.59, taxable: 0.3717, nonTaxable: 0.2183 },
+        '551-800': { total: 0.57, taxable: 0.3591, nonTaxable: 0.2109 },
+        '801+': { total: 0.54, taxable: 0.3402, nonTaxable: 0.1998 }
+    },
+    '1+': {
+        '151-350': { total: 0.66, taxable: 0.4158, nonTaxable: 0.2442 },
+        '351-550': { total: 0.61, taxable: 0.3843, nonTaxable: 0.2257 },
+        '551-800': { total: 0.59, taxable: 0.3717, nonTaxable: 0.2183 },
+        '801+': { total: 0.56, taxable: 0.3528, nonTaxable: 0.2072 }
+    }
 };
+
 const MIN_PAY_PER_LOAD = 75;
 const TARP_PAY = 25;
+const TARP_STOP_PAY = 25;
+const STOP_PAY = 25;
+const BORDER_CROSSING_PAY = 100;
+const LAYOVER_PAY = 114;
+
+// All accessorial pay is fully taxable
+const ACCESSORIAL_TAXABLE_RATIO = 1.0;
 
 function getCurrentTuesdayWeek() {
     const today = new Date();
@@ -127,9 +151,14 @@ function saveTripHistory() {
 }
 
 function getPayRate(experience, totalMiles) {
-    const flatRate = parseFloat(document.getElementById('flatRate').value);
-    if (!isNaN(flatRate) && flatRate > 0) {
-        return flatRate;
+    const flatRateInput = document.getElementById('flatRate').value;
+    if (flatRateInput && !isNaN(parseFloat(flatRateInput)) && parseFloat(flatRateInput) > 0) {
+        const flatRate = parseFloat(flatRateInput);
+        return {
+            total: flatRate,
+            taxable: flatRate * 0.63,
+            nonTaxable: flatRate * 0.37
+        };
     }
 
     if (totalMiles >= 151 && totalMiles <= 350) return payRates[experience]['151-350'];
@@ -137,7 +166,7 @@ function getPayRate(experience, totalMiles) {
     if (totalMiles >= 551 && totalMiles <= 800) return payRates[experience]['551-800'];
     if (totalMiles >= 801) return payRates[experience]['801+'];
     
-    return payRates[experience]['151-350'];
+    return payRates[experience]['151-350']; // Default to shortest range if miles are below 151
 }
 
 function addLoad() {
@@ -145,6 +174,10 @@ function addLoad() {
     const emptyMiles = parseInt(document.getElementById('emptyMiles').value) || 0;
     const loadedMiles = parseInt(document.getElementById('loadedMiles').value) || 0;
     const tarped = document.getElementById('tarped').checked;
+    const tarpStops = parseInt(document.getElementById('tarpStops').value) || 0;
+    const stops = parseInt(document.getElementById('stops').value) || 0;
+    const borderCrossing = document.getElementById('borderCrossing').checked;
+    const layover = document.getElementById('layover').checked;
     const extraPay = parseFloat(document.getElementById('extraPay').value) || 0;
     const experience = document.getElementById('experience').value;
 
@@ -155,9 +188,33 @@ function addLoad() {
 
     const totalMiles = emptyMiles + loadedMiles;
     const payRate = getPayRate(experience, totalMiles);
-    const basePay = Math.max(loadedMiles * payRate, MIN_PAY_PER_LOAD);
+    
+    // Calculate base pay with taxable and non-taxable components
+    let basePay = loadedMiles * payRate.total;
+    let basePayTaxable = loadedMiles * payRate.taxable;
+    let basePayNonTaxable = loadedMiles * payRate.nonTaxable;
+    
+    // Apply minimum pay if needed
+    if (basePay < MIN_PAY_PER_LOAD) {
+        const ratio = MIN_PAY_PER_LOAD / basePay;
+        basePay = MIN_PAY_PER_LOAD;
+        basePayTaxable = basePayTaxable * ratio;
+        basePayNonTaxable = basePayNonTaxable * ratio;
+    }
+    
+    // Calculate accessorial pay (all taxable)
     const tarpPay = tarped ? TARP_PAY : 0;
-    const totalLoadPay = basePay + tarpPay + extraPay;
+    const tarpStopsPay = tarpStops * TARP_STOP_PAY;
+    const stopsPay = stops * STOP_PAY;
+    const borderPay = borderCrossing ? BORDER_CROSSING_PAY : 0;
+    const layoverPay = layover ? LAYOVER_PAY : 0;
+    
+    const totalAccessorialPay = tarpPay + tarpStopsPay + stopsPay + borderPay + layoverPay + extraPay;
+    
+    // Total pay with taxable and non-taxable breakdown
+    const totalLoadPay = basePay + totalAccessorialPay;
+    const totalTaxablePay = basePayTaxable + totalAccessorialPay; // Accessorial pay is fully taxable
+    const totalNonTaxablePay = basePayNonTaxable;
 
     const load = {
         id: Date.now(),
@@ -166,11 +223,26 @@ function addLoad() {
         loadedMiles,
         totalMiles,
         tarped,
+        tarpStops,
+        stops,
+        borderCrossing,
+        layover,
         extraPay,
-        payRate,
+        payRate: payRate.total,
+        payRateTaxable: payRate.taxable,
+        payRateNonTaxable: payRate.nonTaxable,
         basePay,
+        basePayTaxable,
+        basePayNonTaxable,
         tarpPay,
-        totalPay: totalLoadPay
+        tarpStopsPay,
+        stopsPay,
+        borderPay,
+        layoverPay,
+        totalAccessorialPay,
+        totalPay: totalLoadPay,
+        taxablePay: totalTaxablePay,
+        nonTaxablePay: totalNonTaxablePay
     };
 
     loads.push(load);
@@ -190,6 +262,10 @@ function clearForm() {
     document.getElementById('emptyMiles').value = '0';
     document.getElementById('loadedMiles').value = '';
     document.getElementById('tarped').checked = false;
+    document.getElementById('tarpStops').value = '0';
+    document.getElementById('stops').value = '0';
+    document.getElementById('borderCrossing').checked = false;
+    document.getElementById('layover').checked = false;
     document.getElementById('extraPay').value = '0';
 }
 
@@ -224,7 +300,7 @@ function updateLoadsList() {
                     <h5>Empty Miles</h5>
                     <p>${load.emptyMiles}</p>
                 </div>
-                                <div class="summary-item">
+                <div class="summary-item">
                     <h5>Loaded Miles</h5>
                     <p>${load.loadedMiles}</p>
                 </div>
@@ -240,21 +316,23 @@ function updateLoadsList() {
                     <h5>Base Pay</h5>
                     <p>$${load.basePay.toFixed(2)}</p>
                 </div>
-                ${load.tarpPay > 0 ? `
+                ${load.totalAccessorialPay > 0 ? `
                 <div class="summary-item">
-                    <h5>Tarp Pay</h5>
-                    <p>$${load.tarpPay.toFixed(2)}</p>
-                </div>
-                ` : ''}
-                ${load.extraPay > 0 ? `
-                <div class="summary-item">
-                    <h5>Extra Pay</h5>
-                    <p>$${load.extraPay.toFixed(2)}</p>
+                    <h5>Accessorial Pay</h5>
+                    <p>$${load.totalAccessorialPay.toFixed(2)}</p>
                 </div>
                 ` : ''}
                 <div class="summary-item">
                     <h5>Total Pay</h5>
                     <p style="color: #e67e22; font-weight: bold;">$${load.totalPay.toFixed(2)}</p>
+                </div>
+                <div class="summary-item">
+                    <h5>Taxable Pay</h5>
+                    <p>$${load.taxablePay.toFixed(2)}</p>
+                </div>
+                <div class="summary-item">
+                    <h5>Non-Taxable</h5>
+                    <p>$${load.nonTaxablePay.toFixed(2)}</p>
                 </div>
             </div>
         </div>
@@ -263,11 +341,21 @@ function updateLoadsList() {
 
 function updateTotalPay() {
     const additionalPay = parseFloat(document.getElementById('additionalPay').value) || 0;
-    totalPay = loads.reduce((sum, load) => sum + load.totalPay, 0) + additionalPay;
+    
+    const totalLoadPay = loads.reduce((sum, load) => sum + load.totalPay, 0);
+    const totalTaxablePay = loads.reduce((sum, load) => sum + load.taxablePay, 0) + additionalPay; // Additional pay is taxable
+    const totalNonTaxablePay = loads.reduce((sum, load) => sum + load.nonTaxablePay, 0);
+    
+    totalPay = totalLoadPay + additionalPay;
     
     const totalPayElement = document.getElementById('totalPay');
     if (totalPayElement) {
-        totalPayElement.textContent = `Total Pay: $${totalPay.toFixed(2)}`;
+        totalPayElement.innerHTML = `
+            <div>Total Pay: $${totalPay.toFixed(2)}</div>
+            <div style="font-size: 0.8em; margin-top: 5px;">
+                Taxable: $${totalTaxablePay.toFixed(2)} | Non-Taxable: $${totalNonTaxablePay.toFixed(2)}
+            </div>
+        `;
     }
 }
 
@@ -400,14 +488,23 @@ function exportTripHistory() {
         return;
     }
 
-    let csvContent = 'Week Start,Week End,Total Pay,Total Miles,Load Count,Average Per Mile,Saved Date\n';
+    let csvContent = 'Week Start,Week End,Total Pay,Taxable Pay,Non-Taxable Pay,Total Miles,Load Count,Average Per Mile,Saved Date\n';
     
     Object.values(tripHistory).sort((a, b) => new Date(a.week) - new Date(b.week)).forEach(entry => {
         const tuesday = new Date(entry.week + 'T00:00:00');
         const monday = new Date(tuesday);
         monday.setDate(tuesday.getDate() + 6);
         
-        csvContent += `${tuesday.toLocaleDateString()},${monday.toLocaleDateString()},${entry.totalPay.toFixed(2)},${entry.totalMiles},${entry.loadCount},${(entry.totalPay / entry.totalMiles).toFixed(3)},${new Date(entry.savedDate).toLocaleDateString()}\n`;
+        // Calculate taxable and non-taxable totals for the week
+        let taxablePay = 0;
+        let nonTaxablePay = 0;
+        
+        if (entry.loads) {
+            taxablePay = entry.loads.reduce((sum, load) => sum + (load.taxablePay || 0), 0);
+            nonTaxablePay = entry.loads.reduce((sum, load) => sum + (load.nonTaxablePay || 0), 0);
+        }
+        
+        csvContent += `${tuesday.toLocaleDateString()},${monday.toLocaleDateString()},${entry.totalPay.toFixed(2)},${taxablePay.toFixed(2)},${nonTaxablePay.toFixed(2)},${entry.totalMiles},${entry.loadCount},${(entry.totalPay / entry.totalMiles).toFixed(3)},${new Date(entry.savedDate).toLocaleDateString()}\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -463,7 +560,7 @@ function calculateOptimalRuns() {
     }
     
     // Calculate optimal scenarios
-    const avgRate = payRates[experience]['351-550']; // Use medium rate as average
+    const avgRate = payRates[experience]['351-550'].total; // Use medium rate as average
     const milesNeeded = Math.ceil(targetEarnings / avgRate);
     const milesPerDay = Math.ceil(milesNeeded / daysAvailable);
     
@@ -509,4 +606,3 @@ setInterval(() => {
         saveWeekData();
     }
 }, 30000);
-
