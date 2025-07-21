@@ -1,9 +1,10 @@
+// Global variables
 let loads = [];
 let totalPay = 0;
-let currentWeek = getCurrentSundayWeek(); // Changed from Tuesday to Sunday
+let currentWeek = getCurrentSundayWeek();
 let tripHistory = JSON.parse(localStorage.getItem('truckingTripHistory') || '{}');
 
-// Updated pay rates structure with taxable and non-taxable components
+// Pay rates structure with taxable and non-taxable components
 const payRates = {
     '0-6': {
         '151-350': { total: 0.62, taxable: 0.3906, nonTaxable: 0.2294 },
@@ -25,6 +26,7 @@ const payRates = {
     }
 };
 
+// Constants
 const MIN_PAY_PER_LOAD = 75;
 const TARP_PAY = 25;
 const TARP_STOP_PAY = 25;
@@ -32,22 +34,32 @@ const STOP_PAY = 25;
 const BORDER_CROSSING_PAY = 100;
 const LAYOVER_PAY = 114;
 
-// All accessorial pay is fully taxable
-const ACCESSORIAL_TAXABLE_RATIO = 1.0;
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    generateWeekOptions();
+    updatePayPeriodDisplay();
+    loadWeekData();
+    updateTripHistoryDisplay();
+});
 
+// Toggle section visibility
+function toggleSection(contentId) {
+    const content = document.getElementById(contentId);
+    content.classList.toggle('active');
+}
+
+// Get current Sunday week
 function getCurrentSundayWeek() {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 is Sunday
-    
-    // Calculate days to subtract to get to the most recent Sunday
+    const dayOfWeek = today.getDay();
     const daysToSubtract = dayOfWeek;
-
     const thisWeeksSunday = new Date(today);
     thisWeeksSunday.setDate(today.getDate() - daysToSubtract);
     thisWeeksSunday.setHours(0, 0, 0, 0);
     return thisWeeksSunday.toISOString().split('T')[0];
 }
 
+// Update pay period display
 function updatePayPeriodDisplay() {
     const sunday = new Date(currentWeek + 'T00:00:00');
     const saturday = new Date(sunday);
@@ -60,6 +72,7 @@ function updatePayPeriodDisplay() {
     }
 }
 
+// Generate week options
 function generateWeekOptions() {
     const weekSelector = document.getElementById('weekSelector');
     if (!weekSelector) return;
@@ -90,6 +103,7 @@ function generateWeekOptions() {
     }
 }
 
+// Select a week
 function selectWeek(weekId, buttonElement) {
     saveWeekData();
     
@@ -102,6 +116,7 @@ function selectWeek(weekId, buttonElement) {
     updateTripHistoryDisplay();
 }
 
+// Save week data to localStorage
 function saveWeekData() {
     const weekData = {
         loads: loads,
@@ -116,6 +131,7 @@ function saveWeekData() {
     localStorage.setItem(`truckingWeek_${currentWeek}`, JSON.stringify(weekData));
 }
 
+// Load week data from localStorage
 function loadWeekData() {
     const weekData = JSON.parse(localStorage.getItem(`truckingWeek_${currentWeek}`) || '{}');
     
@@ -136,10 +152,12 @@ function loadWeekData() {
     updateDisplay();
 }
 
+// Save trip history
 function saveTripHistory() {
     localStorage.setItem('truckingTripHistory', JSON.stringify(tripHistory));
 }
 
+// Get pay rate based on experience and miles
 function getPayRate(experience, totalMiles) {
     const flatRateInput = document.getElementById('flatRate').value;
     if (flatRateInput && !isNaN(parseFloat(flatRateInput)) && parseFloat(flatRateInput) > 0) {
@@ -156,9 +174,23 @@ function getPayRate(experience, totalMiles) {
     if (totalMiles >= 551 && totalMiles <= 800) return payRates[experience]['551-800'];
     if (totalMiles >= 801) return payRates[experience]['801+'];
     
-    return payRates[experience]['151-350']; // Default to shortest range if miles are below 151
+    return payRates[experience]['151-350'];
 }
 
+// Quick fill load form
+function quickFillLoad(loadType, emptyMiles, loadedMiles, tarped) {
+    document.getElementById('loadName').value = loadType;
+    document.getElementById('emptyMiles').value = emptyMiles;
+    document.getElementById('loadedMiles').value = loadedMiles;
+    document.getElementById('tarped').checked = tarped;
+    document.getElementById('tarpStops').value = 0;
+    document.getElementById('stops').value = 0;
+    document.getElementById('borderCrossing').checked = false;
+    document.getElementById('layover').checked = false;
+    document.getElementById('extraPay').value = 0;
+}
+
+// Add a new load
 function addLoad() {
     const loadName = document.getElementById('loadName').value.trim() || `Load ${loads.length + 1}`;
     const emptyMiles = parseInt(document.getElementById('emptyMiles').value) || 0;
@@ -179,12 +211,10 @@ function addLoad() {
     const totalMiles = emptyMiles + loadedMiles;
     const payRate = getPayRate(experience, totalMiles);
     
-    // Calculate base pay with taxable and non-taxable components
     let basePay = loadedMiles * payRate.total;
     let basePayTaxable = loadedMiles * payRate.taxable;
     let basePayNonTaxable = loadedMiles * payRate.nonTaxable;
     
-    // Apply minimum pay if needed
     if (basePay < MIN_PAY_PER_LOAD) {
         const ratio = MIN_PAY_PER_LOAD / basePay;
         basePay = MIN_PAY_PER_LOAD;
@@ -192,7 +222,6 @@ function addLoad() {
         basePayNonTaxable = basePayNonTaxable * ratio;
     }
     
-    // Calculate accessorial pay (all taxable)
     const tarpPay = tarped ? TARP_PAY : 0;
     const tarpStopsPay = tarpStops * TARP_STOP_PAY;
     const stopsPay = stops * STOP_PAY;
@@ -201,9 +230,8 @@ function addLoad() {
     
     const totalAccessorialPay = tarpPay + tarpStopsPay + stopsPay + borderPay + layoverPay + extraPay;
     
-    // Total pay with taxable and non-taxable breakdown
     const totalLoadPay = basePay + totalAccessorialPay;
-    const totalTaxablePay = basePayTaxable + totalAccessorialPay; // Accessorial pay is fully taxable
+    const totalTaxablePay = basePayTaxable + totalAccessorialPay;
     const totalNonTaxablePay = basePayNonTaxable;
 
     const load = {
@@ -241,363 +269,301 @@ function addLoad() {
     saveWeekData();
 }
 
+// Remove a load
 function removeLoad(id) {
     loads = loads.filter(load => load.id !== id);
     updateDisplay();
     saveWeekData();
 }
 
+// Edit a load
+function editLoad(id) {
+    const load = loads.find(l => l.id === id);
+    if (!load) return;
+    
+    document.getElementById('loadName').value = load.name;
+    document.getElementById('emptyMiles').value = load.emptyMiles;
+    document.getElementById('loadedMiles').value = load.loadedMiles;
+    document.getElementById('tarped').checked = load.tarped;
+    document.getElementById('tarpStops').value = load.tarpStops;
+    document.getElementById('stops').value = load.stops;
+    document.getElementById('borderCrossing').checked = load.borderCrossing;
+    document.getElementById('layover').checked = load.layover;
+    document.getElementById('extraPay').value = load.extraPay;
+    
+    removeLoad(id);
+    
+    // Scroll to form
+    document.getElementById('addLoadForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Clear the form
 function clearForm() {
     document.getElementById('loadName').value = '';
-    document.getElementById('emptyMiles').value = '0';
+    document.getElementById('emptyMiles').value = '';
     document.getElementById('loadedMiles').value = '';
     document.getElementById('tarped').checked = false;
-    document.getElementById('tarpStops').value = '0';
-    document.getElementById('stops').value = '0';
+    document.getElementById('tarpStops').value = 0;
+    document.getElementById('stops').value = 0;
     document.getElementById('borderCrossing').checked = false;
     document.getElementById('layover').checked = false;
-    document.getElementById('extraPay').value = '0';
+    document.getElementById('extraPay').value = 0;
 }
 
-function quickFillLoad(name, emptyMiles, loadedMiles, tarped) {
-    document.getElementById('loadName').value = name;
-    document.getElementById('emptyMiles').value = emptyMiles;
-    document.getElementById('loadedMiles').value = loadedMiles;
-    document.getElementById('tarped').checked = tarped;
-    document.getElementById('tarpStops').value = '0';
-    document.getElementById('stops').value = '0';
-    document.getElementById('borderCrossing').checked = false;
-    document.getElementById('layover').checked = false;
-    document.getElementById('extraPay').value = '0';
-}
-
+// Update all displays
 function updateDisplay() {
+    updatePaySummary();
     updateLoadsList();
-    updateTotalPay();
-    updateGoalTracker();
+    updateWeeklyGoalProgress();
 }
 
-function updateLoadsList() {
-    const loadsList = document.getElementById('loadsList');
-    if (!loadsList) return;
-
-    if (loads.length === 0) {
-        loadsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No loads added yet. Add your first load above!</p>';
-        return;
-    }
-
-    loadsList.innerHTML = loads.map(load => `
-        <div class="load-item">
-            <button class="remove-load-btn" onclick="removeLoad(${load.id})">×</button>
-            <h4>${load.name}</h4>
-            <div class="load-summary">
-                <div class="summary-item">
-                    <h5>Empty Miles</h5>
-                    <p>${load.emptyMiles}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Loaded Miles</h5>
-                    <p>${load.loadedMiles}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Total Miles</h5>
-                    <p>${load.totalMiles}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Pay Rate</h5>
-                    <p>$${load.payRate.toFixed(3)}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Base Pay</h5>
-                    <p>$${load.basePay.toFixed(2)}</p>
-                </div>
-                ${load.totalAccessorialPay > 0 ? `
-                <div class="summary-item">
-                    <h5>Accessorial Pay</h5>
-                    <p>$${load.totalAccessorialPay.toFixed(2)}</p>
-                </div>
-                ` : ''}
-                <div class="summary-item">
-                    <h5>Total Pay</h5>
-                    <p style="color: #e67e22; font-weight: bold;">$${load.totalPay.toFixed(2)}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Taxable Pay</h5>
-                    <p>$${load.taxablePay.toFixed(2)}</p>
-                </div>
-                <div class="summary-item">
-                    <h5>Non-Taxable</h5>
-                    <p>$${load.nonTaxablePay.toFixed(2)}</p>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function updateTotalPay() {
+// Update pay summary
+function updatePaySummary() {
+    const totalMiles = loads.reduce((sum, load) => sum + load.totalMiles, 0);
+    const emptyMiles = loads.reduce((sum, load) => sum + load.emptyMiles, 0);
+    const loadedMiles = loads.reduce((sum, load) => sum + load.loadedMiles, 0);
+    const totalBasePay = loads.reduce((sum, load) => sum + load.basePay, 0);
+    const totalAccessorialPay = loads.reduce((sum, load) => sum + load.totalAccessorialPay, 0);
     const additionalPay = parseFloat(document.getElementById('additionalPay').value) || 0;
     
-    const totalLoadPay = loads.reduce((sum, load) => sum + load.totalPay, 0);
-    const totalTaxablePay = loads.reduce((sum, load) => sum + load.taxablePay, 0) + additionalPay; // Additional pay is taxable
+    totalPay = totalBasePay + totalAccessorialPay + additionalPay;
+    
+    const totalTaxablePay = loads.reduce((sum, load) => sum + load.taxablePay, 0) + additionalPay;
     const totalNonTaxablePay = loads.reduce((sum, load) => sum + load.nonTaxablePay, 0);
-    
-    totalPay = totalLoadPay + additionalPay;
-    
-    const totalPayElement = document.getElementById('totalPay');
-    if (totalPayElement) {
-        totalPayElement.innerHTML = `
-            <div>Total Pay: $${totalPay.toFixed(2)}</div>
-            <div style="font-size: 0.8em; margin-top: 5px;">
-                Taxable: $${totalTaxablePay.toFixed(2)} | Non-Taxable: $${totalNonTaxablePay.toFixed(2)}
-            </div>
-        `;
-    }
-}
 
-function updateGoalTracker() {
-    const weeklyGoal = parseFloat(document.getElementById('weeklyGoal').value) || 0;
-    const goalTracker = document.getElementById('goalTracker');
-    const progressFill = document.getElementById('progressFill');
-    const goalText = document.getElementById('goalText');
+    document.getElementById('totalMiles').textContent = totalMiles;
+    document.getElementById('emptyMiles').textContent = emptyMiles;
+    document.getElementById('loadedMiles').textContent = loadedMiles;
+    document.getElementById('totalBasePay').textContent = totalBasePay.toFixed(2);
+    document.getElementById('totalAccessorialPay').textContent = totalAccessorialPay.toFixed(2);
+    document.getElementById('totalPay').textContent = totalPay.toFixed(2);
+    document.getElementById('totalTaxablePay').textContent = totalTaxablePay.toFixed(2);
+    document.getElementById('totalNonTaxablePay').textContent = totalNonTaxablePay.toFixed(2);
+    document.getElementById('numLoads').textContent = loads.length;
     
-    if (!goalTracker || !progressFill || !goalText) return;
-
-    if (weeklyGoal > 0) {
-        goalTracker.style.display = 'block';
-        const progress = Math.min((totalPay / weeklyGoal) * 100, 100);
-        const remaining = Math.max(weeklyGoal - totalPay, 0);
-        
-        progressFill.style.width = `${progress}%`;
-        
-        if (totalPay >= weeklyGoal) {
-            goalText.innerHTML = `🎉 Goal Achieved! You've earned $${(totalPay - weeklyGoal).toFixed(2)} over your goal!`;
-        } else {
-            goalText.innerHTML = `$${remaining.toFixed(2)} remaining to reach your goal<br>${progress.toFixed(1)}% complete`;
-        }
+    if (totalMiles > 0) {
+        document.getElementById('avgPayPerMile').textContent = (totalPay / totalMiles).toFixed(3);
     } else {
-        goalTracker.style.display = 'none';
+        document.getElementById('avgPayPerMile').textContent = '0.000';
     }
 }
 
-function clearAllLoads() {
-    if (confirm('Are you sure you want to clear all loads for this week?')) {
-        loads = [];
-        updateDisplay();
-        saveWeekData();
-    }
-}
-
-function saveTrips() {
+// Update loads list display
+function updateLoadsList() {
+    const loadsListContainer = document.getElementById('loadsList');
+    if (!loadsListContainer) return;
+    
+    loadsListContainer.innerHTML = '';
+    
     if (loads.length === 0) {
-        alert('No loads to save!');
+        loadsListContainer.innerHTML = '<p class="no-loads">No loads added yet.</p>';
         return;
     }
     
-    const weekData = {
-        week: currentWeek,
-        loads: loads,
-        totalPay: totalPay,
-        totalMiles: loads.reduce((sum, load) => sum + load.totalMiles, 0),
-        loadCount: loads.length,
-        savedDate: new Date().toISOString()
-    };
-    
-    tripHistory[currentWeek] = weekData;
-    saveTripHistory();
-    updateTripHistoryDisplay();
-    alert('Week saved to trip history!');
-}
-
-function loadTrips() {
-    const savedData = localStorage.getItem(`truckingWeek_${currentWeek}`);
-    if (savedData) {
-        loadWeekData();
-        alert('Data loaded successfully!');
-    } else {
-        alert('No saved data found for this week.');
-    }
-}
-
-function updateTripHistoryDisplay() {
-    const tripHistoryList = document.getElementById('tripHistoryList');
-    if (!tripHistoryList) return;
-
-    const historyEntries = Object.values(tripHistory).sort((a, b) => new Date(b.week) - new Date(a.week));
-    
-    if (historyEntries.length === 0) {
-        tripHistoryList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No trip history yet. Complete some weeks and save them!</p>';
-        return;
-    }
-
-    tripHistoryList.innerHTML = historyEntries.map(entry => {
-        const sunday = new Date(entry.week + 'T00:00:00');
-        const saturday = new Date(sunday);
-        saturday.setDate(sunday.getDate() + 6);
-        
-        return `
-            <div class="trip-history-item">
-                <h4>Week of ${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h4>
-                <div class="load-summary">
-                    <div class="summary-item">
-                        <h5>Total Pay</h5>
-                        <p style="color: #e67e22; font-weight: bold;">$${entry.totalPay.toFixed(2)}</p>
+    loads.forEach((load, index) => {
+        const loadItem = document.createElement('div');
+        loadItem.className = 'load-item';
+        loadItem.innerHTML = `
+            <div class="load-header">
+                <h3>${load.name}</h3>
+                <div class="load-actions">
+                    <button onclick="editLoad(${load.id})" class="edit-btn">Edit</button>
+                    <button onclick="removeLoad(${load.id})" class="remove-btn">Remove</button>
+                </div>
+            </div>
+            <div class="load-details">
+                <div class="load-miles">
+                    <span><strong>Empty:</strong> ${load.emptyMiles} mi</span>
+                    <span><strong>Loaded:</strong> ${load.loadedMiles} mi</span>
+                    <span><strong>Total:</strong> ${load.totalMiles} mi</span>
+                </div>
+                <div class="load-pay-breakdown">
+                    <div class="pay-row">
+                        <span>Base Pay (${load.loadedMiles} × $${load.payRate.toFixed(3)}):</span>
+                        <span>$${load.basePay.toFixed(2)}</span>
                     </div>
-                    <div class="summary-item">
-                        <h5>Total Miles</h5>
-                        <p>${entry.totalMiles}</p>
+                    ${load.tarpPay > 0 ? `<div class="pay-row"><span>Tarp:</span><span>$${load.tarpPay}</span></div>` : ''}
+                    ${load.tarpStopsPay > 0 ? `<div class="pay-row"><span>Tarp Stops (${load.tarpStops}):</span><span>$${load.tarpStopsPay}</span></div>` : ''}
+                    ${load.stopsPay > 0 ? `<div class="pay-row"><span>Stops (${load.stops}):</span><span>$${load.stopsPay}</span></div>` : ''}
+                    ${load.borderPay > 0 ? `<div class="pay-row"><span>Border Crossing:</span><span>$${load.borderPay}</span></div>` : ''}
+                    ${load.layoverPay > 0 ? `<div class="pay-row"><span>Layover:</span><span>$${load.layoverPay}</span></div>` : ''}
+                    ${load.extraPay > 0 ? `<div class="pay-row"><span>Extra Pay:</span><span>$${load.extraPay.toFixed(2)}</span></div>` : ''}
+                    <div class="pay-row total-row">
+                        <span><strong>Total Load Pay:</strong></span>
+                        <span><strong>$${load.totalPay.toFixed(2)}</strong></span>
                     </div>
-                    <div class="summary-item">
-                        <h5>Load Count</h5>
-                        <p>${entry.loadCount}</p>
-                    </div>
-                    <div class="summary-item">
-                        <h5>Avg Per Mile</h5>
-                        <p>$${(entry.totalPay / entry.totalMiles).toFixed(3)}</p>
+                    <div class="pay-breakdown-small">
+                        <span>Taxable: $${load.taxablePay.toFixed(2)}</span>
+                        <span>Non-Taxable: $${load.nonTaxablePay.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="btn btn-danger" onclick="deleteHistoryEntry('${entry.week}')" style="max-width: 150px; margin-top: 10px;">Delete Week</button>
             </div>
         `;
-    }).join('');
+        
+        loadsListContainer.appendChild(loadItem);
+    });
 }
 
-function deleteHistoryEntry(weekId) {
-    if (confirm('Are you sure you want to delete this week from history?')) {
-        delete tripHistory[weekId];
-        saveTripHistory();
-        updateTripHistoryDisplay();
+// Update weekly goal progress
+function updateWeeklyGoalProgress() {
+    const weeklyGoal = parseFloat(document.getElementById('weeklyGoal').value) || 1200;
+    const progressPercentage = Math.min((totalPay / weeklyGoal) * 100, 100);
+    const remaining = Math.max(weeklyGoal - totalPay, 0);
+    
+    const progressBar = document.getElementById('goalProgressBar');
+    const progressText = document.getElementById('goalProgressText');
+    const remainingText = document.getElementById('remainingAmount');
+    
+    if (progressBar) {
+        progressBar.style.width = `${progressPercentage}%`;
+        progressBar.className = `progress-bar ${progressPercentage >= 100 ? 'goal-achieved' : ''}`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `$${totalPay.toFixed(2)} / $${weeklyGoal.toFixed(2)} (${progressPercentage.toFixed(1)}%)`;
+    }
+    
+    if (remainingText) {
+        remainingText.textContent = remaining > 0 ? `$${remaining.toFixed(2)} remaining` : 'Goal achieved!';
+        remainingText.className = remaining > 0 ? '' : 'goal-achieved';
     }
 }
 
-function clearTripHistory() {
-    if (confirm('Are you sure you want to clear ALL trip history? This cannot be undone!')) {
-        tripHistory = {};
+// Update trip history display
+function updateTripHistoryDisplay() {
+    const historyContainer = document.getElementById('tripHistoryList');
+    if (!historyContainer) return;
+    
+    // Store current week data in history
+    if (loads.length > 0) {
+        const weekTotals = {
+            totalPay: totalPay,
+            totalMiles: loads.reduce((sum, load) => sum + load.totalMiles, 0),
+            numLoads: loads.length,
+            date: currentWeek
+        };
+        tripHistory[currentWeek] = weekTotals;
         saveTripHistory();
-        updateTripHistoryDisplay();
     }
-}
-
-function exportTripHistory() {
-    if (Object.keys(tripHistory).length === 0) {
-        alert('No trip history to export!');
+    
+    // Display history
+    historyContainer.innerHTML = '';
+    
+    const sortedWeeks = Object.keys(tripHistory)
+        .filter(week => tripHistory[week].totalPay > 0)
+        .sort((a, b) => new Date(b) - new Date(a))
+        .slice(0, 10);
+    
+    if (sortedWeeks.length === 0) {
+        historyContainer.innerHTML = '<p class="no-history">No trip history available.</p>';
         return;
     }
-
-    let csvContent = 'Week Start,Week End,Total Pay,Taxable Pay,Non-Taxable Pay,Total Miles,Load Count,Average Per Mile,Saved Date\n';
     
-    Object.values(tripHistory).sort((a, b) => new Date(a.week) - new Date(b.week)).forEach(entry => {
-        const sunday = new Date(entry.week + 'T00:00:00');
+    sortedWeeks.forEach(week => {
+        const data = tripHistory[week];
+        const sunday = new Date(week + 'T00:00:00');
         const saturday = new Date(sunday);
         saturday.setDate(sunday.getDate() + 6);
         
-        // Calculate taxable and non-taxable totals for the week
-        let taxablePay = 0;
-        let nonTaxablePay = 0;
-        
-        if (entry.loads) {
-            taxablePay = entry.loads.reduce((sum, load) => sum + (load.taxablePay || 0), 0);
-            nonTaxablePay = entry.loads.reduce((sum, load) => sum + (load.nonTaxablePay || 0), 0);
-        }
-        
-        csvContent += `${sunday.toLocaleDateString()},${saturday.toLocaleDateString()},${entry.totalPay.toFixed(2)},${taxablePay.toFixed(2)},${nonTaxablePay.toFixed(2)},${entry.totalMiles},${entry.loadCount},${(entry.totalPay / entry.totalMiles).toFixed(3)},${new Date(entry.savedDate).toLocaleDateString()}\n`;
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `trucking_history_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-}
-
-function toggleSection(sectionId) {
-    const content = document.getElementById(sectionId);
-    if (!content) return;
-    
-    content.classList.toggle('active');
-}
-
-function calculateDistance() {
-    const fromCity = document.getElementById('fromCity').value.trim();
-    const toCity = document.getElementById('toCity').value.trim();
-    const resultDiv = document.getElementById('distanceResult');
-    
-    if (!fromCity || !toCity) {
-        resultDiv.innerHTML = '<span style="color: #e74c3c;">Please enter both cities</span>';
-        return;
-    }
-    
-    resultDiv.innerHTML = '<span style="color: #3498db;">Calculating distance...</span>';
-    
-    // Note: This is a placeholder for Google Maps API integration
-    // You would need to implement actual API calls here
-    setTimeout(() => {
-        const estimatedDistance = Math.floor(Math.random() * 800) + 200; // Random for demo
-        resultDiv.innerHTML = `
-            <div style="background: #e8f5e8; padding: 10px; border-radius: 5px;">
-                <strong>Estimated Distance:</strong> ${estimatedDistance} miles<br>
-                <small style="color: #666;">Note: This is a demo calculation. Integrate with Google Maps API for real distances.</small>
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+            <div class="history-header">
+                <span class="history-date">${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <span class="history-pay">$${data.totalPay.toFixed(2)}</span>
+            </div>
+            <div class="history-details">
+                <span>${data.numLoads} loads</span>
+                <span>${data.totalMiles} miles</span>
+                <span>$${(data.totalPay / data.totalMiles).toFixed(3)}/mi</span>
             </div>
         `;
-    }, 1000);
-}
-
-function calculateOptimalRuns() {
-    const targetEarnings = parseFloat(document.getElementById('targetEarnings').value) || 0;
-    const daysAvailable = parseInt(document.getElementById('daysAvailable').value) || 5;
-    const experience = document.getElementById('experience').value;
-    const resultDiv = document.getElementById('optimalResult');
-    
-    if (targetEarnings <= 0) {
-        resultDiv.innerHTML = '<span style="color: #e74c3c;">Please enter target earnings</span>';
-        return;
-    }
-    
-    // Calculate optimal scenarios
-    const avgRate = payRates[experience]['351-550'].total; // Use medium rate as average
-    const milesNeeded = Math.ceil(targetEarnings / avgRate);
-    const milesPerDay = Math.ceil(milesNeeded / daysAvailable);
-    
-    resultDiv.innerHTML = `
-        <div style="background: #e8f4f8; padding: 15px; border-radius: 8px;">
-            <h4 style="margin-bottom: 10px; color: #2c3e50;">Optimal Run Analysis</h4>
-            <p><strong>Miles needed:</strong> ~${milesNeeded} miles</p>
-            <p><strong>Miles per day:</strong> ~${milesPerDay} miles</p>
-            <p><strong>Suggested strategy:</strong> ${milesPerDay > 400 ? 'Focus on longer hauls (500+ miles)' : 'Mix of medium hauls (350-550 miles)'}</p>
-            <small style="color: #666;">Based on average rate of $${avgRate.toFixed(3)}/mile</small>
-        </div>
-    `;
-}
-
-// Event listeners and initialization
-document.addEventListener('DOMContentLoaded', function() {
-    generateWeekOptions();
-    loadWeekData();
-    updatePayPeriodDisplay();
-    updateTripHistoryDisplay();
-    
-    // Auto-save when settings change
-    ['experience', 'flatRate', 'weeklyGoal', 'additionalPay'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', () => {
-                updateDisplay();
-                saveWeekData();
-            });
-        }
+        
+        historyContainer.appendChild(historyItem);
     });
-    
-    // Auto-update goal tracker when additional pay changes
-    const additionalPayInput = document.getElementById('additionalPay');
-    if (additionalPayInput) {
-        additionalPayInput.addEventListener('input', updateDisplay);
-    }
-});
+}
 
-// Auto-save every 30 seconds
-setInterval(() => {
-    if (loads.length > 0) {
-        saveWeekData();
+// Export data functions
+function exportData() {
+    const data = {
+        currentWeek: currentWeek,
+        loads: loads,
+        tripHistory: tripHistory,
+        settings: {
+            experience: document.getElementById('experience').value,
+            flatRate: document.getElementById('flatRate').value,
+            weeklyGoal: document.getElementById('weeklyGoal').value,
+            additionalPay: document.getElementById('additionalPay').value
+        }
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `trucking_data_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+// Import data functions
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (data.loads) loads = data.loads;
+            if (data.tripHistory) {
+                tripHistory = data.tripHistory;
+                saveTripHistory();
+            }
+            
+            if (data.settings) {
+                document.getElementById('experience').value = data.settings.experience || '0-6';
+                document.getElementById('flatRate').value = data.settings.flatRate || '';
+                document.getElementById('weeklyGoal').value = data.settings.weeklyGoal || '1200';
+                document.getElementById('additionalPay').value = data.settings.additionalPay || '0';
+            }
+            
+            updateDisplay();
+            saveWeekData();
+            updateTripHistoryDisplay();
+            
+            alert('Data imported successfully!');
+        } catch (error) {
+            alert('Error importing data: ' + error.message);
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+// Clear all data
+function clearAllData() {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+        // Clear current loads
+        loads = [];
+        
+        // Clear localStorage
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('truckingWeek_')) {
+                localStorage.removeItem(key);
+            }
+        }
+        
+        // Clear trip history
+        tripHistory = {};
+        localStorage.removeItem('truckingTripHistory');
+        
+        updateDisplay();
+        updateTripHistoryDisplay();
+        alert('All data cleared successfully!');
     }
-}, 30000);
+}
