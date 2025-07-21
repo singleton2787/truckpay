@@ -1,6 +1,6 @@
 let loads = [];
 let totalPay = 0;
-let currentWeek = getCurrentTuesdayWeek();
+let currentWeek = getCurrentSundayWeek(); // Changed from Tuesday to Sunday
 let tripHistory = JSON.parse(localStorage.getItem('truckingTripHistory') || '{}');
 
 // Updated pay rates structure with taxable and non-taxable components
@@ -35,32 +35,28 @@ const LAYOVER_PAY = 114;
 // All accessorial pay is fully taxable
 const ACCESSORIAL_TAXABLE_RATIO = 1.0;
 
-function getCurrentTuesdayWeek() {
+function getCurrentSundayWeek() {
     const today = new Date();
-    const dayOfWeek = today.getDay();
+    const dayOfWeek = today.getDay(); // 0 is Sunday
     
-    let daysToSubtract;
-    if (dayOfWeek >= 2) {
-        daysToSubtract = dayOfWeek - 2;
-    } else {
-        daysToSubtract = dayOfWeek + 5;
-    }
+    // Calculate days to subtract to get to the most recent Sunday
+    const daysToSubtract = dayOfWeek;
 
-    const thisWeeksTuesday = new Date(today);
-    thisWeeksTuesday.setDate(today.getDate() - daysToSubtract);
-    thisWeeksTuesday.setHours(0, 0, 0, 0);
-    return thisWeeksTuesday.toISOString().split('T')[0];
+    const thisWeeksSunday = new Date(today);
+    thisWeeksSunday.setDate(today.getDate() - daysToSubtract);
+    thisWeeksSunday.setHours(0, 0, 0, 0);
+    return thisWeeksSunday.toISOString().split('T')[0];
 }
 
 function updatePayPeriodDisplay() {
-    const tuesday = new Date(currentWeek + 'T00:00:00');
-    const monday = new Date(tuesday);
-    monday.setDate(tuesday.getDate() + 6);
+    const sunday = new Date(currentWeek + 'T00:00:00');
+    const saturday = new Date(sunday);
+    saturday.setDate(sunday.getDate() + 6);
     
     const payPeriodElement = document.getElementById('currentPayPeriod');
     if (payPeriodElement) {
         payPeriodElement.textContent = 
-            `${tuesday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     }
 }
 
@@ -72,28 +68,22 @@ function generateWeekOptions() {
     const today = new Date();
     
     for (let i = -4; i <= 3; i++) {
-        const tuesday = new Date();
+        const sunday = new Date();
         const dayOfWeek = today.getDay();
-        let daysToSubtract;
+        const daysToSubtract = dayOfWeek;
         
-        if (dayOfWeek >= 2) {
-            daysToSubtract = dayOfWeek - 2;
-        } else {
-            daysToSubtract = dayOfWeek + 5;
-        }
-        
-        tuesday.setDate(today.getDate() - daysToSubtract + (i * 7));
-        tuesday.setHours(0, 0, 0, 0);
+        sunday.setDate(today.getDate() - daysToSubtract + (i * 7));
+        sunday.setHours(0, 0, 0, 0);
 
-        const weekId = tuesday.toISOString().split('T')[0];
+        const weekId = sunday.toISOString().split('T')[0];
         const isCurrentWeek = weekId === currentWeek;
         
-        const weekEnd = new Date(tuesday);
-        weekEnd.setDate(tuesday.getDate() + 6);
+        const saturday = new Date(sunday);
+        saturday.setDate(sunday.getDate() + 6);
 
         const weekBtn = document.createElement('div');
         weekBtn.className = `week-btn ${isCurrentWeek ? 'active' : ''}`;
-        weekBtn.textContent = `${tuesday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+        weekBtn.textContent = `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
         weekBtn.onclick = () => selectWeek(weekId, weekBtn);
         
         weekSelector.appendChild(weekBtn);
@@ -274,6 +264,11 @@ function quickFillLoad(name, emptyMiles, loadedMiles, tarped) {
     document.getElementById('emptyMiles').value = emptyMiles;
     document.getElementById('loadedMiles').value = loadedMiles;
     document.getElementById('tarped').checked = tarped;
+    document.getElementById('tarpStops').value = '0';
+    document.getElementById('stops').value = '0';
+    document.getElementById('borderCrossing').checked = false;
+    document.getElementById('layover').checked = false;
+    document.getElementById('extraPay').value = '0';
 }
 
 function updateDisplay() {
@@ -435,13 +430,13 @@ function updateTripHistoryDisplay() {
     }
 
     tripHistoryList.innerHTML = historyEntries.map(entry => {
-        const tuesday = new Date(entry.week + 'T00:00:00');
-        const monday = new Date(tuesday);
-        monday.setDate(tuesday.getDate() + 6);
+        const sunday = new Date(entry.week + 'T00:00:00');
+        const saturday = new Date(sunday);
+        saturday.setDate(sunday.getDate() + 6);
         
         return `
             <div class="trip-history-item">
-                <h4>Week of ${tuesday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h4>
+                <h4>Week of ${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h4>
                 <div class="load-summary">
                     <div class="summary-item">
                         <h5>Total Pay</h5>
@@ -491,9 +486,9 @@ function exportTripHistory() {
     let csvContent = 'Week Start,Week End,Total Pay,Taxable Pay,Non-Taxable Pay,Total Miles,Load Count,Average Per Mile,Saved Date\n';
     
     Object.values(tripHistory).sort((a, b) => new Date(a.week) - new Date(b.week)).forEach(entry => {
-        const tuesday = new Date(entry.week + 'T00:00:00');
-        const monday = new Date(tuesday);
-        monday.setDate(tuesday.getDate() + 6);
+        const sunday = new Date(entry.week + 'T00:00:00');
+        const saturday = new Date(sunday);
+        saturday.setDate(sunday.getDate() + 6);
         
         // Calculate taxable and non-taxable totals for the week
         let taxablePay = 0;
@@ -504,7 +499,7 @@ function exportTripHistory() {
             nonTaxablePay = entry.loads.reduce((sum, load) => sum + (load.nonTaxablePay || 0), 0);
         }
         
-        csvContent += `${tuesday.toLocaleDateString()},${monday.toLocaleDateString()},${entry.totalPay.toFixed(2)},${taxablePay.toFixed(2)},${nonTaxablePay.toFixed(2)},${entry.totalMiles},${entry.loadCount},${(entry.totalPay / entry.totalMiles).toFixed(3)},${new Date(entry.savedDate).toLocaleDateString()}\n`;
+        csvContent += `${sunday.toLocaleDateString()},${saturday.toLocaleDateString()},${entry.totalPay.toFixed(2)},${taxablePay.toFixed(2)},${nonTaxablePay.toFixed(2)},${entry.totalMiles},${entry.loadCount},${(entry.totalPay / entry.totalMiles).toFixed(3)},${new Date(entry.savedDate).toLocaleDateString()}\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -570,7 +565,7 @@ function calculateOptimalRuns() {
             <p><strong>Miles needed:</strong> ~${milesNeeded} miles</p>
             <p><strong>Miles per day:</strong> ~${milesPerDay} miles</p>
             <p><strong>Suggested strategy:</strong> ${milesPerDay > 400 ? 'Focus on longer hauls (500+ miles)' : 'Mix of medium hauls (350-550 miles)'}</p>
-            <small style="color: #666;">Based on average rate of $${avgRate}/mile</small>
+            <small style="color: #666;">Based on average rate of $${avgRate.toFixed(3)}/mile</small>
         </div>
     `;
 }
